@@ -2,7 +2,6 @@ import pygame
 from state_machine import StateMachine
 from states import MainMenuState, GameplayState
 
-# 1. Initialize Pygame and set up the display
 pygame.init()
 pygame.mixer.init()
 screen_width = 800
@@ -24,7 +23,6 @@ states = {
     "GAMEPLAY": GameplayState(screen_width, screen_height)
 }
 
-# Create the machine and tell it which state to start in.
 machine = StateMachine()
 machine.setup_states(states, "MAIN_MENU")
 
@@ -41,18 +39,13 @@ while running:
 
         machine.handle_event(event)
 
-    # Update the current state's logic
     machine.update(dt)
 
-    # Draw whatever the current state needs to draw
     machine.draw(screen)
 
-    # Check if a state has told the machine to quit
     if machine.current_state.quit:
         running = False
     
-    # Update the entire display
     pygame.display.flip()
 
-# 4. Quit Pygame
 pygame.quit()

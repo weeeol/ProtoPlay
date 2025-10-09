@@ -49,7 +49,7 @@ class GameplayState(State):
         self.current_level_path = None
 
 
-# --- NEW: Load the sound effect ---
+# ---Load the sound effect ---
         try:
             self.coin_sound = pygame.mixer.Sound("assets/coin_collect.wav")
             self.hit_sound = pygame.mixer.Sound("assets/enemy_hit.wav")

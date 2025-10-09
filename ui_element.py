@@ -69,7 +69,6 @@ class Button(UIElement):
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.is_pressed:
                 self.on_click()
                 self.is_pressed = False 
-            self.is_pressed = False
             
     def draw(self, screen):
         if self.is_pressed:

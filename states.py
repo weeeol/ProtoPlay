@@ -43,6 +43,9 @@ class GameplayState(State):
         self.screen_width = screen_width
         self.screen_height = screen_height
 
+        self.score = 0
+        self.score_label = TextLabel(x=10, y=10, text=f"Score: {self.score}", font_size=24, color=(255, 255, 255))
+
         self.levels = ["levels/level_1.txt", "levels/level_2.txt", "levels/level_3.txt"]
         self.current_level_index = 0
         
@@ -52,7 +55,7 @@ class GameplayState(State):
         self.current_level_path = None
 
 
-# ---Load the sound effect ---
+# --- Load the sound effect ---
         try:
             self.coin_sound = pygame.mixer.Sound("assets/coin_collect.wav")
             self.hit_sound = pygame.mixer.Sound("assets/enemy_hit.wav")
@@ -69,6 +72,7 @@ class GameplayState(State):
         self.game_scene = Scene()
         self.coins = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
+        self.game_scene.add_ui_element(self.score_label)
         self.current_level_path = file_path
         TILE_SIZE = 50 
         try:
@@ -120,11 +124,14 @@ class GameplayState(State):
                 self.game_scene.all_entities.remove(coin) 
                 print("Coin collected!")
 
-             # --- NEW: Play the sound ---
+             # --- Play the sound ---
                 if self.coin_sound:
                     self.coin_sound.play()
+                
+                self.score += 10
+                self.score_label.set_text(f"Score: {self.score}")
             
-            if not self.coins: # This is True when the coin group is empty
+            if not self.coins:
                 self.go_to_next_level()
 
             # Check for collision with enemies
@@ -139,19 +146,15 @@ class GameplayState(State):
                 return
 
     def go_to_next_level(self):
-        """Advances to the next level or ends the game if all levels are complete."""
         self.current_level_index += 1
         
-        # Check if there are more levels in the list
         if self.current_level_index < len(self.levels):
             print(f"Loading level {self.current_level_index + 1}...")
-            # Load the next level using the new index
             self.load_level(self.levels[self.current_level_index])
         else:
-            # The player has finished the last level
             print("You won the game!")
             self.done = True
-            self.next_state = "MAIN_MENU" # You could create a "WIN_SCREEN" state here!
+            self.next_state = "MAIN_MENU"
 
     def draw(self, screen):
         screen.fill((173, 216, 230)) 

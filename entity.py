@@ -34,7 +34,6 @@ class Player(Entity):
 
         self.hitbox.centerx = self.rect.centerx
 
-    # Check for horizontal collisions
         for sprite in collidables:
             if self.hitbox.colliderect(sprite.rect):
                 if keys[pygame.K_LEFT]: 
@@ -51,7 +50,6 @@ class Player(Entity):
 
         self.hitbox.centery = self.rect.centery
             
-        # Check for vertical collisions
         for sprite in collidables:
             if self.hitbox.colliderect(sprite.rect):
                 if keys[pygame.K_UP]:
@@ -82,7 +80,5 @@ class Enemy(Entity):
     def update(self, dt):
         self.rect.x += self.speed * self.direction * dt
 
-          # --- NEW LOGIC TO TURN AROUND ---
         if abs(self.rect.x - self.start_x) >= self.patrol_range:
-            # Flip the direction
             self.direction *= -1

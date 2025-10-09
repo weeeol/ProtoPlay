@@ -5,11 +5,9 @@ class UIElement:
         self.rect = pygame.Rect(x, y, width, height)
 
     def handle_event(self, event):
-        # Handle user input events (e.g., mouse clicks)
         pass
 
     def draw(self, screen):
-        # Draw the element on the screen
         pass
 
 pygame.font.init()
@@ -21,19 +19,15 @@ class TextLabel(UIElement):
         self.text = text
         self.color = color
         
-        # Render the text to get its dimensions
         text_surface = self.font.render(text, True, color)
-        # Call the parent constructor with the correct size
         super().__init__(x, y, text_surface.get_width(), text_surface.get_height())
         
-        # We store the rendered surface to avoid re-rendering every frame
         self.text_surface = text_surface
 
     def set_text(self, new_text):
         """Allows changing the text later, e.g., for a score display."""
         self.text = new_text
         self.text_surface = self.font.render(self.text, True, self.color)
-        # Update rect size if text length changes
         self.rect.width = self.text_surface.get_width()
         self.rect.height = self.text_surface.get_height()
 
@@ -47,14 +41,14 @@ class Button(UIElement):
         self.text = text
         self.on_click = on_click
         self.is_hovering = False
-        self.is_pressed = False # New state variable
+        self.is_pressed = False 
 
         # Basic styling
-        self.font = pygame.font.Font('font/DejaVuSans.ttf', 24) # Using the fix from above
+        self.font = pygame.font.Font('font/DejaVuSans.ttf', 24) 
         self.text_color = (255, 255, 255)
         self.bg_color = (50, 50, 50)
         self.hover_color = (100, 100, 100)
-        self.pressed_color = (20, 20, 20) # New color for when the button is clicked
+        self.pressed_color = (20, 20, 20) 
 
         self.text_surface = self.font.render(text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect(center=self.rect.center)
@@ -65,22 +59,19 @@ class Button(UIElement):
             self.is_hovering = True
         else:
             self.is_hovering = False
-            self.is_pressed = False # If mouse leaves, it's not pressed
+            self.is_pressed = False 
 
     def handle_event(self, event):
         if self.is_hovering:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                self.is_pressed = True # Set pressed state
+                self.is_pressed = True 
             
-            # The click action now happens on MOUSEBUTTONUP
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1 and self.is_pressed:
                 self.on_click()
-                self.is_pressed = False # Unset pressed state after click
-        else:
+                self.is_pressed = False 
             self.is_pressed = False
             
     def draw(self, screen):
-        # Determine color based on state priority: pressed -> hover -> normal
         if self.is_pressed:
             current_color = self.pressed_color
         elif self.is_hovering:

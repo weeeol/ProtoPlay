@@ -7,14 +7,13 @@ from entity import Entity, Player, Coin, Enemy
 class MainMenuState(State):
     def __init__(self):
         super().__init__()
-        self.menu_scene = Scene() # Use a Scene object!
+        self.menu_scene = Scene()
 
         title = TextLabel(285, 120, "ProtoPlay", 50, (255, 255, 255))
         start_button = Button(325, 250, 150, 50, "Start", self.start_game)
         quit_button = Button(325, 320, 150, 50, "Quit", self.quit_game)
         footer = TextLabel(350, 500, "By Weeeol", 20, (255, 255, 255))
 
-        # Add elements to the scene's UI layer
         self.menu_scene.add_ui_element(title)
         self.menu_scene.add_ui_element(start_button)
         self.menu_scene.add_ui_element(quit_button)
@@ -135,11 +134,9 @@ class GameplayState(State):
 
     def reset(self):
         print("Player died! Resetting level...")
-        # Create a fresh, empty scene and sprite groups
         self.game_scene = Scene()
         self.coins = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         
-        # Reload the level from the saved path
         if self.current_level_path:
             self.load_level(self.current_level_path)

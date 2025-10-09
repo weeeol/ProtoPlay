@@ -32,12 +32,9 @@ class StateMachine:
     def flip_state(self):
         self.current_state.exit_state()
         
-        # Switch to the new state
         next_state_name = self.current_state.next_state
         self.current_state.done = False
         self.current_state = self.states[next_state_name]
-        
-        # Run the setup method on the new state
         self.current_state.enter_state()
 
     def update(self, dt):

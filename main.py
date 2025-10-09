@@ -26,7 +26,6 @@ states = {
 machine = StateMachine()
 machine.setup_states(states, "MAIN_MENU")
 
-# 3. The Game Loop
 running = True
 while running:
     # Calculate delta time

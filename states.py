@@ -46,6 +46,8 @@ class GameplayState(State):
         self.score = 0
         self.score_label = TextLabel(x=10, y=10, text=f"Score: {self.score}", font_size=24, color=(255, 255, 255))
 
+        self.health_label = TextLabel(x=10, y=40, text="", font_size=24, color=(255, 255, 255))
+
         self.levels = ["levels/level_1.txt", "levels/level_2.txt", "levels/level_3.txt"]
         self.current_level_index = 0
         
@@ -73,6 +75,7 @@ class GameplayState(State):
         self.coins = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.game_scene.add_ui_element(self.score_label)
+        self.game_scene.add_ui_element(self.health_label)
         self.current_level_path = file_path
         TILE_SIZE = 50 
         try:
@@ -89,6 +92,7 @@ class GameplayState(State):
                         elif char == 'P':
                              self.player = Player(x=pos_x, y=pos_y, bounds=(self.screen_width, self.screen_height))
                              self.game_scene.add_entity(self.player)
+                             self.health_label.set_text(f"Health: {self.player.health}")
 
                         elif char == 'C':
                             coin = Coin(pos_x, pos_y)
@@ -137,13 +141,35 @@ class GameplayState(State):
             # Check for collision with enemies
             hit_enemies = pygame.sprite.spritecollide(self.player, self.enemies, False)
             if hit_enemies:
+                enemy = hit_enemies[0]
+                self.player.take_damage(1)
+                self.health_label.set_text(f"Health: {self.player.health}")
                 if self.hit_sound:
                     self.hit_sound.play()
-                self.reset()
-                print("Hit an enemy!")
-                self.done = True
-                self.next_state = "MAIN_MENU"
-                return
+
+                dx = self.player.rect.centerx - enemy.rect.centerx
+                dy = self.player.rect.centery - enemy.rect.centery
+
+                # Check which overlap is smaller to determine primary collision axis
+                if abs(dx) > abs(dy):
+                    # Collision is more horizontal
+                    if dx > 0: # Player is to the right of the enemy
+                        self.player.rect.x += 50 # Knock right
+                    else: # Player is to the left of the enemy
+                        self.player.rect.x -= 50 # Knock left
+                else:
+                    # Collision is more vertical
+                    if dy > 0: # Player is below the enemy
+                        self.player.rect.y += 50 # Knock down
+                    else: # Player is above the enemy
+                        self.player.rect.y -= 50 # Knock up
+                if self.player.health <= 0:
+                    print("You ran out of health! Game Over.")
+                    self.reset()
+                    print("Hit an enemy!")
+                    self.done = True
+                    self.next_state = "MAIN_MENU"
+                    return
 
     def go_to_next_level(self):
         self.current_level_index += 1
@@ -162,9 +188,12 @@ class GameplayState(State):
 
     def reset(self):
         print("Player died! Resetting level...")
+        self.score = 0
         self.game_scene = Scene()
         self.coins = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         
         if self.current_level_path:
             self.load_level(self.current_level_path)
+
+        self.score_label.set_text(f"Score: {self.score}")

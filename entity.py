@@ -21,6 +21,16 @@ class Player(Entity):
         self.bounds = pygame.Rect(0, 0, bounds[0], bounds[1])
         self.hitbox = self.rect.inflate(-2, -2) 
 
+        self.max_health = 10
+        self.health = self.max_health
+
+    def take_damage(self, amount):
+        self.health -= amount
+        print(f"Player took damage! Health is now: {self.health}")
+
+    def reset_health(self):
+        self.health = self.max_health
+
     def update(self, dt, collidables):
         prev_x = self.rect.x
         prev_y = self.rect.y

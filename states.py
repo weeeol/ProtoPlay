@@ -110,9 +110,13 @@ class GameplayState(State):
             self.game_scene.add_entity(self.player)
 
     def handle_event(self, event):
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            self.next_state = "MAIN_MENU"
-            self.done = True
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.next_state = "MAIN_MENU"
+                self.done = True
+            if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                if hasattr(self, 'player'):
+                    self.player.jump()
         self.game_scene.handle_events(event)
 
     def update(self, dt):
@@ -150,15 +154,13 @@ class GameplayState(State):
                 dx = self.player.rect.centerx - enemy.rect.centerx
                 dy = self.player.rect.centery - enemy.rect.centery
 
-                # Check which overlap is smaller to determine primary collision axis
+                
                 if abs(dx) > abs(dy):
-                    # Collision is more horizontal
-                    if dx > 0: # Player is to the right of the enemy
+                    if dx > 0: 
                         self.player.rect.x += 50 # Knock right
-                    else: # Player is to the left of the enemy
+                    else:
                         self.player.rect.x -= 50 # Knock left
                 else:
-                    # Collision is more vertical
                     if dy > 0: # Player is below the enemy
                         self.player.rect.y += 50 # Knock down
                     else: # Player is above the enemy

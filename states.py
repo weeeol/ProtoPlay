@@ -161,7 +161,7 @@ class GameplayState(State):
                     else:
                         self.player.rect.x -= 50 # Knock left
                 else:
-                    if dy > 0: # Player is below the enemy
+                    if dy > 0:
                         self.player.rect.y += 50 # Knock down
                     else: # Player is above the enemy
                         self.player.rect.y -= 50 # Knock up

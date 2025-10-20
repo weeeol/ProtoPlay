@@ -76,7 +76,6 @@ class GameplayState(State):
 
         self.score = 0
         self.score_label = TextLabel(x=10, y=10, text=f"Score: {self.score}", font_size=24, color=(255, 255, 255))
-
         self.health_label = TextLabel(x=10, y=40, text="", font_size=24, color=(255, 255, 255))
 
         self.levels = ["levels/level_1.txt", "levels/level_2.txt", "levels/level_3.txt"]
@@ -86,6 +85,20 @@ class GameplayState(State):
         self.coins = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.current_level_path = None
+
+        self.is_paused = False
+        self.pause_scene = Scene()
+        
+        self.pause_overlay = pygame.Surface((screen_width, screen_height), pygame.SRCALPHA)
+        self.pause_overlay.fill((0, 0, 0, 150)) 
+
+        pause_title = TextLabel(300, 150, "Paused", 50, (255, 255, 255))
+        resume_button = Button(325, 250, 150, 50, "Resume", self.resume_game)
+        menu_button = Button(325, 320, 150, 50, "Main Menu", self.quit_to_menu)
+        
+        self.pause_scene.add_ui_element(pause_title)
+        self.pause_scene.add_ui_element(resume_button)
+        self.pause_scene.add_ui_element(menu_button)
 
 
 # --- Load the sound effect ---
@@ -100,6 +113,16 @@ class GameplayState(State):
 
         # Load the level from the file
         self.load_level(self.levels[self.current_level_index])
+    
+    def resume_game(self):
+        self.is_paused = False
+    
+    def quit_to_menu(self):
+        self.is_paused = False
+        self.reset()
+        self.current_level_index = 0
+        self.next_state = "MAIN_MENU"
+        self.done = True
 
     def load_level(self, file_path):
         self.game_scene = Scene()
@@ -143,14 +166,21 @@ class GameplayState(State):
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.next_state = "MAIN_MENU"
-                self.done = True
-            if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
-                if hasattr(self, 'player'):
-                    self.player.jump()
-        self.game_scene.handle_events(event)
+                self.is_paused = not self.is_paused
+                
+        if self.is_paused:
+            self.pause_scene.handle_events(event)
+        else:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                    if hasattr(self, 'player'):
+                        self.player.jump()
+            self.game_scene.handle_events(event)
 
     def update(self, dt):
+        if self.is_paused:
+            self.pause_scene.update(dt)
+            return 
         if hasattr(self, 'player'):
             self.player.update(dt, self.game_scene.collidables)
             self.game_scene.update(dt, exclude=self.player)
@@ -220,6 +250,9 @@ class GameplayState(State):
     def draw(self, screen):
         screen.fill((173, 216, 230)) 
         self.game_scene.draw(screen)
+        if self.is_paused:
+            screen.blit(self.pause_overlay, (0, 0))
+            self.pause_scene.draw(screen)
 
     def reset(self):
         print("Player died! Resetting level...")

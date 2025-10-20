@@ -36,6 +36,37 @@ class MainMenuState(State):
         screen.fill((20, 20, 50))
         self.menu_scene.draw(screen)
 
+class GameOverState(State):
+    def __init__(self):
+        super().__init__()
+        self.game_over_scene = Scene()
+
+        title = TextLabel(260, 120, "Game Over", 50, (255, 255, 255))
+        retry_button = Button(325, 250, 150, 50, "Retry", self.retry_game)
+        menu_button = Button(325, 320, 150, 50, "Main Menu", self.go_to_menu)
+
+        self.game_over_scene.add_ui_element(title)
+        self.game_over_scene.add_ui_element(retry_button)
+        self.game_over_scene.add_ui_element(menu_button)
+
+    def retry_game(self):
+        self.next_state = "GAMEPLAY"
+        self.done = True
+
+    def go_to_menu(self):
+        self.next_state = "MAIN_MENU"
+        self.done = True
+
+    def handle_event(self, event):
+        self.game_over_scene.handle_events(event)
+
+    def update(self, dt):
+        self.game_over_scene.update(dt)
+
+    def draw(self, screen):
+        screen.fill((50, 20, 20))
+        self.game_over_scene.draw(screen)
+
 
 class GameplayState(State):
     def __init__(self, screen_width, screen_height):
@@ -167,10 +198,10 @@ class GameplayState(State):
                         self.player.rect.y -= 50 # Knock up
                 if self.player.health <= 0:
                     print("You ran out of health! Game Over.")
-                    self.reset()
+                    self.reset() # Reset the level data first
                     print("Hit an enemy!")
                     self.done = True
-                    self.next_state = "MAIN_MENU"
+                    self.next_state = "GAME_OVER" 
                     return
 
     def go_to_next_level(self):
@@ -181,6 +212,8 @@ class GameplayState(State):
             self.load_level(self.levels[self.current_level_index])
         else:
             print("You won the game!")
+            self.current_level_index = 0
+            self.reset()
             self.done = True
             self.next_state = "MAIN_MENU"
 

@@ -25,7 +25,6 @@ class TextLabel(UIElement):
         self.text_surface = text_surface
 
     def set_text(self, new_text):
-        """Allows changing the text later, e.g., for a score display."""
         self.text = new_text
         self.text_surface = self.font.render(self.text, True, self.color)
         self.rect.width = self.text_surface.get_width()

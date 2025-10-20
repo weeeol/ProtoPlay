@@ -1,6 +1,6 @@
 import pygame
 from state_machine import StateMachine
-from states import MainMenuState, GameplayState
+from states import MainMenuState, GameplayState, GameOverState
 
 pygame.init()
 pygame.mixer.init()
@@ -20,7 +20,8 @@ except pygame.error as e:
 # --- State Machine Setup ---
 states = {
     "MAIN_MENU": MainMenuState(),
-    "GAMEPLAY": GameplayState(screen_width, screen_height)
+    "GAMEPLAY": GameplayState(screen_width, screen_height),
+    "GAME_OVER": GameOverState()
 }
 
 machine = StateMachine()

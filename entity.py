@@ -30,10 +30,15 @@ class Player(Entity):
         self.gravity = 900 
         self.jump_strength = -450
         self.on_ground = False
+        self.invincibility_duration = 1000  # in milliseconds
+        self.last_hit_time = 0
 
     def take_damage(self, amount):
-        self.health -= amount
-        print(f"Player took damage! Health is now: {self.health}")
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_hit_time > self.invincibility_duration:
+            self.health -= amount
+            print(f"Player took damage! Health is now: {self.health}")
+            self.last_hit_time = current_time
 
     def reset_health(self):
         self.health = self.max_health
@@ -94,6 +99,15 @@ class Player(Entity):
         if self.rect.right > self.bounds.right: self.rect.right = self.bounds.right
         if self.rect.top < self.bounds.top: self.rect.top = self.bounds.top
         if self.rect.bottom > self.bounds.bottom: self.rect.bottom = self.bounds.bottom
+
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_hit_time < self.invincibility_duration:
+            if (current_time // 100) % 2 == 0:
+                self.image.set_alpha(150)
+            else:
+                self.image.set_alpha(255)
+        else:
+            self.image.set_alpha(255)
 
     def jump(self):
         if self.on_ground:

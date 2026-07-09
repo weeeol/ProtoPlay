@@ -1,41 +1,27 @@
 import pygame
-
-class Entity(pygame.sprite.Sprite):
-    def __init__(self, x, y, image_path):
-        super().__init__() 
-        self.image = pygame.image.load(image_path).convert_alpha()
-        self.rect = self.image.get_rect(topleft=(x, y))
-
-    def update(self, dt):
-        pass
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
+from entities.entity import Entity
+from core.engine import settings
 
 class Player(Entity):
     def __init__(self, x, y, bounds):
         super().__init__(x, y, "assets/player.png") 
         
-        self.speed = 200
         self.bounds = pygame.Rect(0, 0, bounds[0], bounds[1])
         self.hitbox = self.rect.inflate(-2, -2) 
 
-        self.max_health = 10
+        self.max_health = settings.PLAYER_MAX_HEALTH
         self.health = self.max_health
 
          # --- Physics Attributes ---
         self.velocity = pygame.math.Vector2(0, 0)
-        self.speed = 200
-        self.gravity = 900 
-        self.jump_strength = -450
         self.on_ground = False
-        self.invincibility_duration = 1000  # in milliseconds
+        self.jumps_remaining = settings.PLAYER_MAX_JUMPS
+        self.jump_key_pressed_last_frame = False
         self.last_hit_time = 0
 
     def take_damage(self, amount):
         current_time = pygame.time.get_ticks()
-        if current_time - self.last_hit_time > self.invincibility_duration:
+        if current_time - self.last_hit_time > settings.PLAYER_INVINCIBILITY_DURATION:
             self.health -= amount
             print(f"Player took damage! Health is now: {self.health}")
             self.last_hit_time = current_time
@@ -43,21 +29,37 @@ class Player(Entity):
     def reset_health(self):
         self.health = self.max_health
 
-    def update(self, dt, collidables):
+    def update(self, dt):
         prev_x = self.rect.x
         prev_y = self.rect.y
         super().update(dt)
 
-    # --- Horizontal Movement ---
+        collidables = self.scene.collidables if self.scene else []
+
+        # --- Horizontal Movement & Jumping ---
         keys = pygame.key.get_pressed()
         self.velocity.x = 0
         if keys[pygame.K_LEFT]:
-            self.rect.x -= self.speed * dt
+            self.velocity.x = -settings.PLAYER_SPEED
         if keys[pygame.K_RIGHT]:
-            self.rect.x += self.speed * dt
+            self.velocity.x = settings.PLAYER_SPEED
+            
+        jump_key_pressed = keys[pygame.K_UP] or keys[pygame.K_SPACE]
+        
+        if self.on_ground:
+            self.jumps_remaining = settings.PLAYER_MAX_JUMPS
+            if jump_key_pressed:
+                self.jump()
+                self.jumps_remaining -= 1
+        else:
+            if jump_key_pressed and not self.jump_key_pressed_last_frame and self.jumps_remaining > 0:
+                self.jump()
+                self.jumps_remaining -= 1
+                
+        self.jump_key_pressed_last_frame = jump_key_pressed
 
-          # --- 2. Apply Gravity ---
-        self.velocity.y += self.gravity * dt
+        # --- Apply Gravity ---
+        self.velocity.y += settings.GRAVITY * dt
         if self.velocity.y > 1000:
             self.velocity.y = 1000
 
@@ -66,19 +68,14 @@ class Player(Entity):
 
         for sprite in collidables:
             if self.hitbox.colliderect(sprite.rect):
-                if keys[pygame.K_LEFT]: 
+                if self.velocity.x < 0: # moving left
                     self.rect.left = sprite.rect.right - (self.rect.width - self.hitbox.width) / 2
-                elif keys[pygame.K_RIGHT]:
+                elif self.velocity.x > 0: # moving right
                     self.rect.right = sprite.rect.left + (self.rect.width - self.hitbox.width) / 2
                 self.velocity.x = 0    
                 self.hitbox.centerx = self.rect.centerx
 
-        # --- Vertical Movement ---
-        if keys[pygame.K_UP]:
-            self.rect.y -= self.speed * dt
-        if keys[pygame.K_DOWN]:
-            self.rect.y += self.speed * dt
-
+        # Vertical movement based on velocity instead of keys (which the old code had left in)
         self.rect.y += self.velocity.y * dt
         self.hitbox.centery = self.rect.centery
         self.on_ground = False
@@ -101,7 +98,7 @@ class Player(Entity):
         if self.rect.bottom > self.bounds.bottom: self.rect.bottom = self.bounds.bottom
 
         current_time = pygame.time.get_ticks()
-        if current_time - self.last_hit_time < self.invincibility_duration:
+        if current_time - self.last_hit_time < settings.PLAYER_INVINCIBILITY_DURATION:
             if (current_time // 100) % 2 == 0:
                 self.image.set_alpha(150)
             else:
@@ -110,23 +107,4 @@ class Player(Entity):
             self.image.set_alpha(255)
 
     def jump(self):
-        if self.on_ground:
-            self.velocity.y = self.jump_strength
-
-class Coin(Entity):
-    def __init__(self, x, y):
-        super().__init__(x, y, "assets/coin.png")
-
-class Enemy(Entity):
-    def __init__(self, x, y):
-        super().__init__(x, y, "assets/enemy.png")
-        self.speed = 50
-        self.direction = 1
-        self.start_x = x
-        self.patrol_range = 80
-
-    def update(self, dt):
-        self.rect.x += self.speed * self.direction * dt
-
-        if abs(self.rect.x - self.start_x) >= self.patrol_range:
-            self.direction *= -1
+        self.velocity.y = settings.PLAYER_JUMP_STRENGTH

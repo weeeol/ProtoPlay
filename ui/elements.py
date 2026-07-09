@@ -1,8 +1,11 @@
 import pygame
+from core.engine import settings
+from core import resource_manager
 
 class UIElement:
     def __init__(self, x, y, width, height):
         self.rect = pygame.Rect(x, y, width, height)
+        self.scene = None
 
     def handle_event(self, event):
         pass
@@ -13,9 +16,8 @@ class UIElement:
 pygame.font.init()
 
 class TextLabel(UIElement):
-    def __init__(self, x, y, text, font_size, color):
-        # Create a font object
-        self.font = pygame.font.Font('font/DejaVuSans.ttf', font_size)
+    def __init__(self, x, y, text, font_size, color=settings.COLOR_TEXT):
+        self.font = resource_manager.get_font('font/DejaVuSans.ttf', font_size)
         self.text = text
         self.color = color
         
@@ -43,11 +45,11 @@ class Button(UIElement):
         self.is_pressed = False 
 
         # Basic styling
-        self.font = pygame.font.Font('font/DejaVuSans.ttf', 24) 
-        self.text_color = (255, 255, 255)
-        self.bg_color = (50, 50, 50)
-        self.hover_color = (100, 100, 100)
-        self.pressed_color = (20, 20, 20) 
+        self.font = resource_manager.get_font('font/DejaVuSans.ttf', 24) 
+        self.text_color = settings.COLOR_TEXT
+        self.bg_color = settings.COLOR_BUTTON_BG
+        self.hover_color = settings.COLOR_BUTTON_HOVER
+        self.pressed_color = settings.COLOR_BUTTON_PRESSED
 
         self.text_surface = self.font.render(text, True, self.text_color)
         self.text_rect = self.text_surface.get_rect(center=self.rect.center)

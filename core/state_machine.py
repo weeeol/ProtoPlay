@@ -1,24 +1,3 @@
-class State:
-    def __init__(self):
-        self.done = False
-        self.next_state = None
-        self.quit = False
-
-    def handle_event(self, event):
-        pass
-
-    def update(self, dt):
-        pass
-
-    def draw(self, screen):
-        pass
-    def enter_state(self):
-        pass
-
-    def exit_state(self):
-        pass
-
-
 class StateMachine:
     def __init__(self):
         self.states = {}
@@ -38,7 +17,6 @@ class StateMachine:
         self.current_state.enter_state()
 
     def update(self, dt):
-
         if self.current_state.done:
             self.flip_state()
         self.current_state.update(dt)
